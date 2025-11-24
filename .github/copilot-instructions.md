@@ -1,45 +1,47 @@
-# GitHub Copilot Instructions for OpenCore EFI Project
+# Instruksi GitHub Copilot untuk Proyek OpenCore EFI
 
-This repository contains the OpenCore EFI configuration for a Hackintosh build on an **HP EliteDesk 800 G3 SFF** (Intel Kaby Lake i3-7100).
+Repositori ini berisi konfigurasi OpenCore EFI untuk build Hackintosh pada **HP EliteDesk 800 G3 SFF** (Intel Kaby Lake i3-7100).
 
-## Project Structure & Architecture
+## Struktur & Arsitektur Proyek
 
-- **Root**: `EFI/OC` is the main working directory.
-- **Configuration**: `EFI/OC/config.plist` is the central configuration file (XML format). It controls boot behavior, hardware patches, and driver loading.
-- **ACPI**: `EFI/OC/ACPI` contains SSDT patches (`.aml`).
-- **Kexts**: `EFI/OC/Kexts` contains macOS kernel extensions (drivers).
-- **Drivers**: `EFI/OC/Drivers` contains UEFI drivers (`.efi`).
-- **Tools**: `EFI/OC/Tools` contains UEFI tools (Shell, CleanNvram, etc.).
+- **Root**: `EFI/OC` adalah direktori kerja utama.
+- **Konfigurasi**: `EFI/OC/config.plist` adalah file konfigurasi pusat (format XML). Ini mengontrol perilaku boot, patch perangkat keras, dan pemuatan driver.
+- **ACPI**: `EFI/OC/ACPI` berisi patch SSDT (`.aml`).
+- **Kexts**: `EFI/OC/Kexts` berisi ekstensi kernel macOS (driver).
+- **Drivers**: `EFI/OC/Drivers` berisi driver UEFI (`.efi`).
+- **Tools**: `EFI/OC/Tools` berisi alat UEFI (Shell, CleanNvram, dll.).
 
-## Critical Workflows & Conventions
+## Alur Kerja Kritis & Konvensi
 
-### 1. Modifying Configuration (`config.plist`)
-- **Format**: The file is a standard XML Property List. Ensure valid XML syntax when editing.
-- **Schema Compliance**: The structure must strictly adhere to the OpenCore Configuration schema for the specific version in use (approx. v1.0.3).
-- **Registration**: Simply adding a file to a folder is **not sufficient**. You must register it in `config.plist`:
-    - **ACPI**: Add entry to `ACPI -> Add`.
-    - **Kexts**: Add entry to `Kernel -> Add`. **Order is critical** (e.g., `Lilu.kext` must be first, `VirtualSMC.kext` usually second).
-    - **Drivers**: Add entry to `UEFI -> Drivers`.
-    - **Tools**: Add entry to `Misc -> Tools`.
+### 1. Memodifikasi Konfigurasi (`config.plist`)
+- **Format**: File ini adalah Daftar Properti XML standar. Pastikan sintaks XML valid saat mengedit.
+- **Kepatuhan Skema**: Struktur harus sangat mematuhi skema Konfigurasi OpenCore untuk versi yang digunakan (v1.0.3 sesuai README).
+- **Registrasi**: Hanya menambahkan file ke folder **tidak cukup**. Anda harus mendaftarkannya di `config.plist`:
+    - **ACPI**: Tambahkan entri ke `ACPI -> Add`.
+    - **Kexts**: Tambahkan entri ke `Kernel -> Add`. **Urutan sangat penting** (misalnya, `Lilu.kext` harus pertama, `VirtualSMC.kext` biasanya kedua).
+    - **Drivers**: Tambahkan entri ke `UEFI -> Drivers`.
+    - **Tools**: Tambahkan entri ke `Misc -> Tools`.
 
-### 2. Kext Management
-- **Dependencies**: Respect dependency chains.
-    - `AppleALC`, `WhateverGreen`, `VirtualSMC` depend on `Lilu`.
-    - Plugins (e.g., `SMCProcessor`, `SMCSuperIO`) depend on `VirtualSMC`.
-- **Wi-Fi/BT**: This build uses `AirportItlwm.kext` (Intel Wi-Fi) and `IntelBluetoothFirmware.kext`.
-- **USB**: USB mapping is handled by `USBToolBox.kext` and `UTBMap.kext`. Avoid generic USB injectors if these are present.
+### 2. Manajemen Kext
+- **Ketergantungan**: Hormati rantai ketergantungan.
+    - `AppleALC`, `WhateverGreen`, `VirtualSMC` bergantung pada `Lilu`.
+    - Plugin (misalnya, `SMCProcessor`, `SMCSuperIO`) bergantung pada `VirtualSMC`.
+- **Wi-Fi/BT**: Build ini menggunakan `AirportItlwm.kext` (Intel Wi-Fi) dan `IntelBluetoothFirmware.kext`.
+- **USB**: Pemetaan USB ditangani oleh `USBToolBox.kext` dan `UTBMap.kext`. Hindari injektor USB generik jika ini ada.
 
-### 3. ACPI Patching
-- **SSDTs**: Custom SSDTs (e.g., `SSDT-PLUG.aml`, `SSDT-EC-USBX.aml`) are used to patch ACPI tables.
-- **Quirks**: Ensure `ACPI -> Quirks` match the Kaby Lake desktop recommendations (e.g., `RebaseRegions` is usually false).
+### 3. Patching ACPI
+- **SSDT**: SSDT kustom (misalnya, `SSDT-PLUG.aml`, `SSDT-EC-USBX.aml`) digunakan untuk mem-patch tabel ACPI.
+- **Quirks**: Pastikan `ACPI -> Quirks` sesuai dengan rekomendasi desktop Kaby Lake (misalnya, `RebaseRegions` biasanya false).
 
-## Specific Hardware Details
+## Detail Perangkat Keras Spesifik
 - **Model**: HP EliteDesk 800 G3 SFF
 - **CPU**: Intel Core i3-7100 (Kaby Lake)
-- **Graphics**: Intel HD Graphics 630 (Headless or Drive-driving depending on dGPU presence, usually requires `WhateverGreen` framebuffer patching).
-- **Ethernet**: Intel I219-LM (uses `IntelMausi.kext`).
-- **Audio**: Conexant CX20632 (requires `AppleALC` with specific layout-id, often `20` or `28` for HP).
+- **RAM**: 8GB
+- **OS Target**: macOS 15.2 (Sequoia)
+- **Grafis**: Intel HD Graphics 630 (Headless atau Drive-driving tergantung keberadaan dGPU, biasanya memerlukan patching framebuffer `WhateverGreen`).
+- **Ethernet**: Intel I219-LM (menggunakan `IntelMausi.kext`).
+- **Audio**: Conexant CX20632 (memerlukan `AppleALC` dengan layout-id spesifik, seringkali `20` atau `28` untuk HP).
 
-## Common Tasks
-- **Update OpenCore**: Requires replacing `OpenCore.efi`, `BOOTx64.efi`, `Drivers`, and validating `config.plist` against the new `Sample.plist`.
-- **Change Boot Args**: Edit `NVRAM -> Add -> 7C436110-AB2A-4BBB-A880-FE41995C9F82 -> boot-args`.
+## Tugas Umum
+- **Update OpenCore**: Memerlukan penggantian `OpenCore.efi`, `BOOTx64.efi`, `Drivers`, dan memvalidasi `config.plist` terhadap `Sample.plist` baru.
+- **Ubah Boot Args**: Edit `NVRAM -> Add -> 7C436110-AB2A-4BBB-A880-FE41995C9F82 -> boot-args`.
